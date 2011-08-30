@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+
+import lxml
+import lxml.html
+import sys
+
+def main(path, doc):
+    values = doc.xpath(path)
+    for idx, value in enumerate(values):
+        if isinstance(value, lxml.html.HtmlElement):
+            print idx
+            print 'elem.text_content:', value.text_content()
+            print 'elem.tail: "%s"'  % (value.tail.strip(),)
+        else:
+            print idx
+            print value
+    print
+
+if __name__ == '__main__':
+    if len(sys.argv) != 3:
+        print 'Must have the path and the document.'
+        sys.exit()
+
+    doc = lxml.html.fromstring(open(sys.argv[1], 'r').read())
+    path = sys.argv[2]
+    main(path, doc)
