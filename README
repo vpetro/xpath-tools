@@ -1,0 +1,20 @@
+XPath-Tools
+
+fx - Find XPath query
+=====================
+Generate short paths for accessing a specific string in a given page.
+
+Show generated queries only.
+cat doc.html | fx 'search string'
+
+Show generated queries with percentage string match (length based, very simple)
+cat doc.html | fx -p 'search string'
+
+Show generated queries with percentage match and fetched content
+cat doc.html | fx -p -c 'search string'
+
+xp - Run XPath query
+====================
+Run Xpath query on a HTML/XML document and show the results.
+
+xp doc.html '//text()'
