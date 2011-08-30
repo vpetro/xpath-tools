@@ -44,6 +44,8 @@ def main(search_string, with_percentage=False, with_content=False):
 
     for text_elem in text_elements:
         text_string = unicode(text_elem.encode('utf-8'), errors='ignore').lower().strip()
+        for char in ('\n', '\t', '\r'):
+            text_string = text_string.replace(char, '')
         if search_string in text_string:
             path = get_path(text_elem.getparent(), doc)
             result = ''
@@ -54,7 +56,7 @@ def main(search_string, with_percentage=False, with_content=False):
                     break
             text_elem_length = len(text_string)
             percentage = 100 * (float(search_string_length) / float(text_elem_length))
-            paths.append((percentage, "'%s/text()'" % result, text_elem))
+            paths.append((percentage, "'%s/text()'" % result, text_string))
 
     paths = sorted(paths, reverse=True)
     for (percentage, path, content) in paths:
