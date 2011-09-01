@@ -1,6 +1,8 @@
-#!/opt/local/bin/python2.6
+#!/usr/bin/env python
+# -*- coding: utf8 -*-
 import re
 import sys
+import getopt
 
 from lxml import etree, html
 
@@ -39,6 +41,11 @@ def main(search_string, with_percentage=False, with_content=False):
     for line in sys.stdin:
         content += line
 
+    for string in search_string:
+        do_search(string, content)
+
+
+def do_search(search_string, content):
     doc = html.fromstring(content)
     text_elements = doc.xpath('//text()')
     search_string_length = len(search_string)
@@ -79,21 +86,29 @@ def main(search_string, with_percentage=False, with_content=False):
 
 
 if __name__ == '__main__':
-    search_string = None
     with_percentage = False
     with_content = False
 
-    if len(sys.argv) == 2:
-        search_string = sys.argv[1]
-    elif len(sys.argv) == 3:
-        if sys.argv[1] == '-p':
-            with_percentage = True
-        elif sys.argv[1] == '-c':
-            with_content = True
-        search_string = sys.argv[2]
-    elif len(sys.argv) == 4:
-        search_string = sys.argv[3]
-        with_percentage = True
-        with_content = True
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "pc", [
+            "percentage",
+            "content"
+        ])
+    except getopt.GetoptError, err:
+        print(str(err))
+        sys.exit(1)
 
-    main(search_string, with_percentage, with_content)
+    for o, a in opts:
+        if o in ("-p", "--percentage"):
+            with_percentage = True
+        elif o in ("-c", "--content"):
+            with_content = True
+        else:
+            print("Unknown option (%s)" % o)
+            sys.exit(1)
+
+    if not args:
+        print("Need at least one string to search for.")
+        sys.exit(1)
+
+    main(args, with_percentage, with_content)
