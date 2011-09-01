@@ -1,7 +1,11 @@
-#!/opt/local/bin/python2.6
-import sys
+#!/usr/bin/env python
+# -*- coding: utf8 -*-
 import re
+import sys
+import getopt
+
 from lxml import etree, html
+
 
 def get_index(tree, elem):
     index = tree.getpath(elem).split('/')[-1]
@@ -9,6 +13,7 @@ def get_index(tree, elem):
         index = re.findall('\d+', index)[0]
         return index
     return None
+
 
 def get_path(elem, doc):
     nodes = []
@@ -29,12 +34,18 @@ def get_path(elem, doc):
         parent = parent.getparent()
     return list(reversed(nodes))
 
+
 def main(search_string, with_percentage=False, with_content=False):
     content = ""
 
     for line in sys.stdin:
         content += line
 
+    for string in search_string:
+        do_search(string, content)
+
+
+def do_search(search_string, content):
     doc = html.fromstring(content)
     text_elements = doc.xpath('//text()')
     search_string_length = len(search_string)
@@ -43,25 +54,29 @@ def main(search_string, with_percentage=False, with_content=False):
     paths = []
 
     for text_elem in text_elements:
-        text_string = unicode(text_elem.encode('utf-8'), errors='ignore').lower().strip()
+        text_string = unicode(text_elem.encode('utf-8'), errors='ignore')
+        text_string = text_string.lower().strip()
+
         for char in ('\n', '\t', '\r'):
             text_string = text_string.replace(char, '')
+
         if search_string in text_string:
             path = get_path(text_elem.getparent(), doc)
             result = ''
             for idx, _ in enumerate(path):
-                temp = "//" + "/".join(path[(-1)*(idx+1):])
+                temp = "//" + "/".join(path[(-1) * (idx + 1):])
                 if len(doc.xpath(temp)) == 1:
                     result = temp
                     break
             text_elem_length = len(text_string)
-            percentage = 100 * (float(search_string_length) / float(text_elem_length))
+            percentage = 100 * (
+                float(search_string_length) / float(text_elem_length))
             paths.append((percentage, "'%s/text()'" % result, text_string))
 
     paths = sorted(paths, reverse=True)
     for (percentage, path, content) in paths:
         if with_percentage and with_content:
-            print '%.2f | %s | %s' % ( percentage, path, content)
+            print '%5.2f | %s | %s' % (percentage, path, content)
         elif with_percentage:
             print '%5.2f | %s' % (percentage, path)
         elif with_content:
@@ -71,21 +86,29 @@ def main(search_string, with_percentage=False, with_content=False):
 
 
 if __name__ == '__main__':
-    search_string = None
     with_percentage = False
     with_content = False
 
-    if len(sys.argv) == 2:
-        search_string = sys.argv[1]
-    elif len(sys.argv) == 3:
-        if sys.argv[1] == '-p':
-            with_percentage = True
-        elif sys.argv[1] == '-c':
-            with_content = True
-        search_string = sys.argv[2]
-    elif len(sys.argv) == 4:
-        search_string = sys.argv[3]
-        with_percentage = True
-        with_content = True
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "pc", [
+            "percentage",
+            "content"
+        ])
+    except getopt.GetoptError, err:
+        print(str(err))
+        sys.exit(1)
 
-    main(search_string, with_percentage, with_content)
+    for o, a in opts:
+        if o in ("-p", "--percentage"):
+            with_percentage = True
+        elif o in ("-c", "--content"):
+            with_content = True
+        else:
+            print("Unknown option (%s)" % o)
+            sys.exit(1)
+
+    if not args:
+        print("Need at least one string to search for.")
+        sys.exit(1)
+
+    main(args, with_percentage, with_content)
