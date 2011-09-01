@@ -76,7 +76,7 @@ def do_search(search_string, content):
     paths = sorted(paths, reverse=True)
     for (percentage, path, content) in paths:
         if with_percentage and with_content:
-            print '%.2f | %s | %s' % (percentage, path, content)
+            print '%5.2f | %s | %s' % (percentage, path, content)
         elif with_percentage:
             print '%5.2f | %s' % (percentage, path)
         elif with_content:
