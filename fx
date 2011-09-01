@@ -1,7 +1,9 @@
 #!/opt/local/bin/python2.6
-import sys
 import re
+import sys
+
 from lxml import etree, html
+
 
 def get_index(tree, elem):
     index = tree.getpath(elem).split('/')[-1]
@@ -9,6 +11,7 @@ def get_index(tree, elem):
         index = re.findall('\d+', index)[0]
         return index
     return None
+
 
 def get_path(elem, doc):
     nodes = []
@@ -29,6 +32,7 @@ def get_path(elem, doc):
         parent = parent.getparent()
     return list(reversed(nodes))
 
+
 def main(search_string, with_percentage=False, with_content=False):
     content = ""
 
@@ -43,25 +47,29 @@ def main(search_string, with_percentage=False, with_content=False):
     paths = []
 
     for text_elem in text_elements:
-        text_string = unicode(text_elem.encode('utf-8'), errors='ignore').lower().strip()
+        text_string = unicode(text_elem.encode('utf-8'), errors='ignore')
+        text_string = text_string.lower().strip()
+
         for char in ('\n', '\t', '\r'):
             text_string = text_string.replace(char, '')
+
         if search_string in text_string:
             path = get_path(text_elem.getparent(), doc)
             result = ''
             for idx, _ in enumerate(path):
-                temp = "//" + "/".join(path[(-1)*(idx+1):])
+                temp = "//" + "/".join(path[(-1) * (idx + 1):])
                 if len(doc.xpath(temp)) == 1:
                     result = temp
                     break
             text_elem_length = len(text_string)
-            percentage = 100 * (float(search_string_length) / float(text_elem_length))
+            percentage = 100 * (
+                float(search_string_length) / float(text_elem_length))
             paths.append((percentage, "'%s/text()'" % result, text_string))
 
     paths = sorted(paths, reverse=True)
     for (percentage, path, content) in paths:
         if with_percentage and with_content:
-            print '%.2f | %s | %s' % ( percentage, path, content)
+            print '%.2f | %s | %s' % (percentage, path, content)
         elif with_percentage:
             print '%5.2f | %s' % (percentage, path)
         elif with_content:
