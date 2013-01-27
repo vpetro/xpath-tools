@@ -1,5 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
+"""
+Find XPaths that lead to a particular string.
+
+Usage:
+    fx <search-string> [options]
+
+Arguments:
+    <search-string>  The string to search the document for.
+
+Options
+    -p --percentage  Show percentage match value
+    -c --content     Show the matched content
+"""
+
+from docopt import docopt
 import re
 import sys
 import getopt
@@ -86,29 +101,9 @@ def do_search(search_string, content):
 
 
 if __name__ == '__main__':
-    with_percentage = False
-    with_content = False
+    args = docopt(__doc__)
 
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "pc", [
-            "percentage",
-            "content"
-        ])
-    except getopt.GetoptError, err:
-        print(str(err))
-        sys.exit(1)
-
-    for o, a in opts:
-        if o in ("-p", "--percentage"):
-            with_percentage = True
-        elif o in ("-c", "--content"):
-            with_content = True
-        else:
-            print("Unknown option (%s)" % o)
-            sys.exit(1)
-
-    if not args:
-        print("Need at least one string to search for.")
-        sys.exit(1)
-
+    search_string = args['<search-string>']
+    with_percentage = args['--percentage']
+    with_content = args['--content']
     main(args, with_percentage, with_content)
