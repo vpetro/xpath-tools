@@ -18,3 +18,4 @@ xp - Run XPath query
 Run Xpath query on a HTML/XML document and show the results.
 
 xp doc.html '//text()'
+
