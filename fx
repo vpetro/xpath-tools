@@ -42,6 +42,7 @@ def get_path(elem, doc):
                 attrs.append("@%s=\"%s\"" % (key, value))
             if index:
                 attrs.append('position()=%s' % index)
+
         if attrs:
             nodes.append("%s[%s]" % (parent.tag, " and ".join(attrs)))
         else:
