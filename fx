@@ -107,4 +107,5 @@ if __name__ == '__main__':
     search_string = args['<search-string>']
     with_percentage = args['--percentage']
     with_content = args['--content']
+
     main(args, with_percentage, with_content)
